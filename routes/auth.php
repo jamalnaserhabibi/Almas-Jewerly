@@ -11,12 +11,8 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+// Guest routes (only for non-authenticated users)
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-                ->name('register');
-
-    Route::post('register', [RegisteredUserController::class, 'store']);
-
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
                 ->name('login');
 
@@ -35,7 +31,15 @@ Route::middleware('guest')->group(function () {
                 ->name('password.store');
 });
 
+// Authenticated routes (including registration)
 Route::middleware('auth')->group(function () {
+    // Move registration routes here - only authenticated users can register new users
+    Route::get('register', [RegisteredUserController::class, 'create'])
+                ->name('register');
+
+    Route::post('register', [RegisteredUserController::class, 'store']);
+
+    // Email verification routes
     Route::get('verify-email', EmailVerificationPromptController::class)
                 ->name('verification.notice');
 

@@ -1,50 +1,65 @@
-import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Head, useForm } from '@inertiajs/react';
+import GuestLayout from "@/Layouts/GuestLayout";
+import InputError from "@/Components/InputError";
+import PrimaryButton from "@/Components/PrimaryButton";
+import TextInput from "@/Components/TextInput";
+import { Head, useForm } from "@inertiajs/react";
 
 export default function ForgotPassword({ status }) {
-    const { data, setData, post, processing, errors } = useForm({
-        email: '',
-    });
-
-    const submit = (e) => {
-        e.preventDefault();
-
-        post(route('password.email'));
-    };
-
     return (
         <GuestLayout>
             <Head title="Forgot Password" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email address and we will email you a password
-                reset link that will allow you to choose a new one.
-            </div>
+            <div className="flex items-center justify-center min-h-screen bg-gray-100">
+                <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
+                    {/* Branding */}
+                    <div className="text-center mb-6">
+                        <h1 className="text-2xl font-bold text-gray-800">
+                            Almas Jewelry
+                        </h1>
+                        <p className="text-sm text-gray-500">
+                            Password Recovery
+                        </p>
+                    </div>
 
-            {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
+                    <div className="mb-4 text-sm text-gray-600 text-center">
+                        Enter your email address and we will send you a password
+                        reset link.
+                    </div>
 
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
+                    {status && (
+                        <div className="mb-4 text-sm font-medium text-green-600 text-center">
+                            {status}
+                        </div>
+                    )}
 
-                <InputError message={errors.email} className="mt-2" />
+                    {/* Button */}
+                    <div className="flex items-center justify-center mt-6">
+                        <PrimaryButton className="w-full justify-center">
+                            Contact Zahin Soft
+                        </PrimaryButton>
+                    </div>
+                    <div className="flex items-center justify-center mt-6">
+                        <PrimaryButton className="w-full justify-center">
+                            Contact Almas Jewelry
+                        </PrimaryButton>
+                    </div>
 
-                <div className="flex items-center justify-end mt-4">
-                    <PrimaryButton className="ml-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
+                    {/* Footer / Permission */}
+                    <div className="mt-8 text-center text-xs text-gray-400">
+                        Access provided with permission from
+                        <span className="font-semibold"> Almas Jewelry </span>
+                        <br />
+                        Powered by{" "}
+                        <a
+                            href="https://zahinsoft.com"
+                            target="_blank"
+                            className="text-blue-500 hover:underline"
+                        >
+                            Zahin Soft
+                        </a>
+                    </div>
                 </div>
-            </form>
+            </div>
         </GuestLayout>
     );
 }

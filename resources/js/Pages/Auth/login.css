@@ -1,0 +1,55 @@
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    width: 420px;
+    padding: 1rem 2rem;
+    border-radius: 20px;
+    background: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    height: 200px;
+    /* margin-bottom: 10px; */
+}
+
+.login-form .field {
+    margin-bottom: 1.3rem;
+}
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.login-btn {
+    height: 45px;
+}
+/* make password component full width */
+.p-password {
+    width: 100% !important;
+    display: block;
+}
+
+/* input inside password */
+.p-password input {
+    width: 100% !important;
+    height: 42px;
+    border-radius: 10px;
+}
+
+/* keep icon inside input */
+.p-password .p-inputtext {
+    width: 100% !important;
+}
