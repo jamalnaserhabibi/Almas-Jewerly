@@ -19,7 +19,9 @@ export default function Show({ item }) {
         }).format(amount);
 
     const isInStock = item.status?.toLowerCase() === "in_stock";
-
+    const handlePrintBarcode = () => {
+        window.open(route("gold-items.print", item.id), "_blank");
+    };
     return (
         <Layout>
             <Head title={`Gold Item - ${item.barcode}`} />
@@ -175,45 +177,67 @@ export default function Show({ item }) {
                                                         }
                                                     />
                                                 }
+                                                <Button
+                                                    label="Print Barcode"
+                                                    icon="pi pi-print"
+                                                    severity="info"
+                                                    onClick={handlePrintBarcode}
+                                                    outlined
+                                                />
                                             </div>
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <div className="photoAndBcode">
+                            {/* Right Photo */}
+                            {item.photo && (
+                                <div className="flex-1 flex justify-content-center">
+                                    <img
+                                        src={`/storage/${item.photo}`}
+                                        alt="Gold Item"
+                                        className="border-round shadow-3 cursor-pointer"
+                                        style={{
+                                            maxWidth: "400px",
+                                            maxHeight: "400px",
+                                        }}
+                                        onClick={() => setPhotoVisible(true)}
+                                    />
+                                </div>
+                            )}
 
-                        {/* Right Photo */}
-                        {item.photo && (
-                            <div className="flex-1 flex justify-content-center">
-                                <img
-                                    src={`/storage/${item.photo}`}
-                                    alt="Gold Item"
-                                    className="border-round shadow-3 cursor-pointer"
-                                    style={{
-                                        maxWidth: "400px",
-                                        maxHeight: "400px",
-                                    }}
-                                    onClick={() => setPhotoVisible(true)}
-                                />
+                            {/* Photo Dialog */}
+
+                            <div className="d-flex">
+                                <Dialog
+                                    header="Gold Item Photo"
+                                    visible={photoVisible}
+                                    onHide={() => setPhotoVisible(false)}
+                                    style={{ width: "50vw" }}
+                                    modal
+                                >
+                                    <img
+                                        src={`/storage/${item.photo}`}
+                                        alt="Gold Item"
+                                        className="w-full h-auto border-round"
+                                    />
+                                </Dialog>
+                                {item.barcode_image && (
+                                    <div className="mt-4">
+                                        <img
+                                            src={`/${item.barcode_image}`}
+                                            alt="Barcode"
+                                            style={{
+                                                maxWidth: "300px",
+                                            }}
+                                        />
+                                        <div className="mt-2 font-mono">
+                                            {item.barcode}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
-
-                        {/* Photo Dialog */}
-
-                        <div className="d-flex">
-                            <Dialog
-                                header="Gold Item Photo"
-                                visible={photoVisible}
-                                onHide={() => setPhotoVisible(false)}
-                                style={{ width: "50vw" }}
-                                modal
-                            >
-                                <img
-                                    src={`/storage/${item.photo}`}
-                                    alt="Gold Item"
-                                    className="w-full h-auto border-round"
-                                />
-                            </Dialog>
                         </div>
                     </div>
                 </div>

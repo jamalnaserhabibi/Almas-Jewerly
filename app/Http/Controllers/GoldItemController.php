@@ -113,29 +113,25 @@ class GoldItemController extends Controller
 
     $goldItem = GoldItem::create($validated);
 
-    try {
-        $barcodePath = $this->barcodeService->saveBarcodeSVG(
-            $goldItem->barcode,
-            'gold_' . $goldItem->id
-        );
-        $goldItem->update(['barcode_image' => $barcodePath]);
-    } catch (\Exception $e) {
-        \Log::error('Barcode generation failed: ' . $e->getMessage());
-    }
-
-    return redirect()->back()->with('success', 'Gold item added successfully');
+try {
+    $barcodePath = $this->barcodeService->saveBarcodeSVG(
+        $goldItem->barcode,
+        'gold_' . $goldItem->id
+    );
+    $goldItem->update(['barcode_image' => $barcodePath]);
+} catch (\Exception $e) {
+    \Log::error('Barcode generation failed: ' . $e->getMessage());
 }
 
-/**
- * Update a gold item
- */
+return redirect()->route('gold-items.show', $goldItem->id)->with('success', 'Gold item added successfully');}
+
+
 public function update(Request $request, GoldItem $goldItem)
 {
     $rules = [
         'source_type' => 'required|in:company,individual',
         'weight' => 'required|numeric|min:0.001',
         'karat_id' => 'required|exists:karats,id',
-        'unit_price' => 'required|numeric|min:0',
         'purchase_date' => 'required|date',
         'notes' => 'nullable|string',
         'photo' => 'nullable|image|max:2048',
@@ -144,9 +140,11 @@ public function update(Request $request, GoldItem $goldItem)
     if ($request->source_type === 'company') {
         $rules['company_id'] = 'required|exists:companies,id';
         $rules['fee'] = 'nullable|numeric|min:0';
+       
     } else {
         $rules['individual_name'] = 'required|string|max:255';
         $rules['acidic_average'] = 'required|numeric|min:0|max:100';
+        $rules['unit_price'] = 'required|numeric|min:0';  
     }
 
     $validated = $request->validate($rules);
@@ -154,13 +152,12 @@ public function update(Request $request, GoldItem $goldItem)
     if ($request->source_type === 'company') {
         $validated['individual_name'] = null;
         $validated['acidic_average'] = null;
+        $validated['unit_price'] = null;  
     } else {
         $validated['company_id'] = null;
         $validated['fee'] = null;
     }
-
-    $validated['total_price'] = $validated['weight'] * $validated['unit_price'];
-
+ 
     if ($request->hasFile('photo')) {
         if ($goldItem->photo) {
             $oldPhotoPath = storage_path('app/public/' . $goldItem->photo);
@@ -175,18 +172,13 @@ public function update(Request $request, GoldItem $goldItem)
 
     $goldItem->update($validated);
 
-    // Always regenerate SVG barcode on update
+    
     try {
-     
-       
-        
-        // Generate new SVG
         $barcodePath = $this->barcodeService->saveBarcodeSVG(
             $goldItem->barcode, 
             'gold_' . $goldItem->id
         );
         
-        // Only update if different from current
         if ($goldItem->barcode_image !== $barcodePath) {
             $goldItem->update(['barcode_image' => $barcodePath]);
         }

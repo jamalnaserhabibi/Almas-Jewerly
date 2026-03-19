@@ -54,7 +54,6 @@ Route::post('/gold-items', [GoldItemController::class, 'store'])->name('gold-ite
 Route::get('/gold-items/scan', [GoldItemController::class, 'scan'])->name('gold-items.scan');
 Route::post('/gold-items/scan/search', [GoldItemController::class, 'search'])->name('gold-items.scan.search');
 
-// Routes WITH parameters - put these AFTER all non-parameter routes
 Route::get('/gold-items/{goldItem}/print', [GoldItemController::class, 'printBarcode'])->name('gold-items.print');
 Route::put('/gold-items/{goldItem}', [GoldItemController::class, 'update'])->name('gold-items.update');
 Route::delete('/gold-items/{goldItem}', [GoldItemController::class, 'destroy'])->name('gold-items.destroy');

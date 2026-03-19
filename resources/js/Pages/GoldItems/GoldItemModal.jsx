@@ -7,7 +7,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
 import { classNames } from "primereact/utils";
-import { useForm } from "@inertiajs/react";
+import { useForm, router } from "@inertiajs/react";
 
 export default function GoldItemModal({
     visible,
@@ -60,34 +60,61 @@ export default function GoldItemModal({
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const formData = { ...data };
 
-        // Remove irrelevant fields based on source type
-        if (formData.source_type === "company") {
-            delete formData.individual_name;
-            delete formData.acidic_average;
-            delete formData.unit_price;
+        // Create FormData object
+        const formData = new FormData();
+
+        // Append all fields
+        formData.append("source_type", data.source_type);
+        formData.append("weight", data.weight);
+        formData.append("karat_id", data.karat_id);
+        formData.append(
+            "purchase_date",
+            data.purchase_date instanceof Date
+                ? data.purchase_date.toISOString().split("T")[0]
+                : data.purchase_date,
+        );
+        formData.append("notes", data.notes || "");
+
+        // Conditional fields
+        if (data.source_type === "company") {
+            formData.append("company_id", data.company_id);
+            if (data.fee) formData.append("fee", data.fee);
         } else {
-            delete formData.company_id;
-            delete formData.fee;
+            formData.append("individual_name", data.individual_name);
+            formData.append("acidic_average", data.acidic_average);
+            formData.append("unit_price", data.unit_price);
+        }
+
+        // Handle photo
+        if (data.photo instanceof File) {
+            formData.append("photo", data.photo);
         }
 
         if (item) {
-            put(route("gold-items.update", item.id), {
-                data: formData,
+            // UPDATE - use POST with _method=PUT
+            formData.append("_method", "PUT");
+            router.post(route("gold-items.update", item.id), formData, {
                 preserveScroll: true,
                 onSuccess: () => {
                     onSuccess?.();
                     onHide();
                 },
+                onError: (errors) => {
+                    console.log("Update errors:", errors);
+                    // Show errors in toast if needed
+                },
             });
         } else {
-            post(route("gold-items.store"), {
-                data: formData,
+            // CREATE
+            router.post(route("gold-items.store"), formData, {
                 preserveScroll: true,
                 onSuccess: () => {
                     onSuccess?.();
                     onHide();
+                },
+                onError: (errors) => {
+                    console.log("Create errors:", errors);
                 },
             });
         }
