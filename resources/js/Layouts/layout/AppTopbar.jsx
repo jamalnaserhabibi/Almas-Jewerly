@@ -30,6 +30,25 @@ const AppTopbar = forwardRef((props, ref) => {
     // State for current time
     const [currentTime, setCurrentTime] = useState(new Date());
 
+    // State for theme
+    const [isDarkTheme, setIsDarkTheme] = useState(() => {
+        // Check current theme from localStorage or default to dark (vela-blue)
+        const savedTheme = localStorage.getItem("theme");
+        return savedTheme === "saga-blue" ? false : true;
+    });
+
+    // State for logo text color
+    const [logoColor, setLogoColor] = useState(
+        isDarkTheme ? "white" : "#00002D",
+    );
+
+    // State for logo image
+    const [logoSrc, setLogoSrc] = useState(
+        isDarkTheme
+            ? "/images/logo/almas_logo2.png"
+            : "/images/logo/almas_logo.png",
+    );
+
     // Update time every second
     useEffect(() => {
         const timer = setInterval(() => {
@@ -38,6 +57,28 @@ const AppTopbar = forwardRef((props, ref) => {
 
         return () => clearInterval(timer);
     }, []);
+
+    // Theme switcher function
+    const toggleTheme = () => {
+        const themeLink = document.getElementById("theme-css");
+        if (themeLink) {
+            if (isDarkTheme) {
+                // Switch to light theme (saga-blue)
+                themeLink.href = "/themes/saga-blue/theme.css";
+                localStorage.setItem("theme", "saga-blue");
+                setIsDarkTheme(false);
+                setLogoColor("#00002D"); // Dark blue color for light theme
+                setLogoSrc("/images/logo/almas_logo.png"); // Light theme logo
+            } else {
+                // Switch to dark theme (vela-blue)
+                themeLink.href = "/themes/vela-blue/theme.css";
+                localStorage.setItem("theme", "vela-blue");
+                setIsDarkTheme(true);
+                setLogoColor("white"); // White color for dark theme
+                setLogoSrc("/images/logo/almas_logo2.png"); // Dark theme logo
+            }
+        }
+    };
 
     // Format English date
     const englishDate = currentTime.toLocaleDateString("en-US", {
@@ -137,12 +178,13 @@ const AppTopbar = forwardRef((props, ref) => {
         <div className="layout-topbar">
             {/* Logo Section */}
             <Link href="/" className="layout-topbar-logo">
-                <img
-                    src="/images/logo/almas_logo.png"
-                    height={"35px"}
-                    alt="logo"
-                />
-                <span className="ml-2 font-bold">Almas Jewelry</span>
+                <img src={logoSrc} alt="logo" />
+                <span
+                    className="ml-2 font-bold"
+                    style={{ color: logoColor, fontSize: "1.8rem" }}
+                >
+                    Almas Jewelry
+                </span>
             </Link>
 
             {/* Menu Toggle Button (Mobile) */}
@@ -157,10 +199,27 @@ const AppTopbar = forwardRef((props, ref) => {
 
             {/* Right Side Content */}
             <div className="flex align-items-center gap-4 ml-auto">
+                {/* Theme Switcher Button */}
+                <Button
+                    type="button"
+                    className="p-button-rounded p-button-text p-button-plain"
+                    onClick={toggleTheme}
+                    tooltip={
+                        isDarkTheme
+                            ? "Switch to Light Theme"
+                            : "Switch to Dark Theme"
+                    }
+                    tooltipOptions={{ position: "bottom" }}
+                >
+                    <i
+                        className={`pi ${isDarkTheme ? "pi-sun" : "pi-moon"} text-xl`}
+                    ></i>
+                </Button>
+
                 {/* Date and Time Display - Both Formats */}
                 <div className="hidden md:flex flex-row gap-5 align-items-end">
                     {/* English Date */}
-                    <div className="text-sm text-500 font-medium">
+                    <div className="text-md font-bold text-900">
                         {englishDate}
                     </div>
                     {/* Afghanistan Date */}
@@ -182,7 +241,7 @@ const AppTopbar = forwardRef((props, ref) => {
                 {/* User Info and Menu */}
                 <div className="flex align-items-center gap-3">
                     {/* User Name (hidden on mobile) */}
-                    <span className="hidden lg:inline text-900 font-medium">
+                    <span className="hidden lg:inline text-900 flex align-items-center font-bold   mt-1">
                         {user?.name || "User"}
                     </span>
 

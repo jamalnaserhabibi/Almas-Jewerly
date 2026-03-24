@@ -26,53 +26,90 @@ export default function Login({ status, canResetPassword }) {
     };
 
     return (
-        <GuestLayout>
-            <Head title="Login" />
+        <div className="login-wrapper">
+            <div className="login-frame">
+                <div className="login-card">
+                    {/* Decorative corner elements with gemstones */}
+                    <div className="corner-decoration top-left">
+                        <div className="gemstone"></div>
+                    </div>
+                    <div className="corner-decoration top-right">
+                        <div className="gemstone"></div>
+                    </div>
+                    <div className="corner-decoration bottom-left">
+                        <div className="gemstone"></div>
+                    </div>
+                    <div className="corner-decoration bottom-right">
+                        <div className="gemstone"></div>
+                    </div>
 
-            <div className="login-wrapper">
-                <div className="login-frame">
-                    <div className="login-card">
-                        {/* Logo */}
-                        <div className="login-header">
+                    {/* Background pattern overlay */}
+                    <div className="pattern-overlay"></div>
+
+                    {/* Logo Section with Jewelry Accent */}
+                    <div className="login-header">
+                        <div className="logo-wrapper">
+                            <div className="gem-sparkle"></div>
                             <img
                                 src="/images/logo/almas_logo.png"
-                                alt="Almas Logo"
+                                alt="Almas Jewelry"
                                 className="login-logo"
                             />
-
-                            <h2 style={{ marginBottom: "5px" }}>
-                                Almas Jewelry
-                            </h2>
-                            <span>Sign in to continue</span>
+                            <div className="ring-glow"></div>
                         </div>
 
-                        {status && <div className="login-status">{status}</div>}
+                        <h1 className="brand-title">ALMAS</h1>
+                        <p className="brand-subtitle">
+                            Jewelry Database Management
+                        </p>
+                        <div className="gold-divider">
+                            <span className="divider-icon">✦</span>
+                            <span className="divider-line"></span>
+                            <span className="divider-icon">💎</span>
+                            <span className="divider-line"></span>
+                            <span className="divider-icon">✦</span>
+                        </div>
+                        <p className="login-greeting">
+                            Welcome, Enter your credentials
+                        </p>
+                    </div>
 
-                        <form onSubmit={submit} className="login-form">
-                            {/* Username */}
-                            <div className="field">
-                                <label>Username</label>
+                    {/* Status Message */}
+                    {status && (
+                        <div className="login-status">
+                            <i className="pi pi-info-circle"></i>
+                            <span>{status}</span>
+                        </div>
+                    )}
 
+                    <form onSubmit={submit} className="login-form">
+                        <div className="field">
+                            <label className="field-label">
+                                <i className="pi pi-envelope"></i> Username
+                            </label>
+                            <div className="input-wrapper">
                                 <InputText
                                     value={data.email}
                                     onChange={(e) =>
                                         setData("email", e.target.value)
                                     }
-                                    placeholder="Username"
-                                    className="w-full"
+                                    placeholder="name@almas.com"
+                                    className={`luxury-input ${errors.email ? "p-invalid" : ""}`}
                                 />
-
                                 {errors.email && (
                                     <small className="p-error">
+                                        <i className="pi pi-exclamation-circle"></i>
                                         {errors.email}
                                     </small>
                                 )}
                             </div>
+                        </div>
 
-                            {/* Password */}
-                            <div className="field">
-                                <label>Password</label>
-
+                        <div className="field">
+                            <label className="field-label">
+                                <i className="pi pi-lock"></i> Password
+                            </label>
+                            <div className="input-wrapper">
                                 <Password
                                     value={data.password}
                                     onChange={(e) =>
@@ -80,50 +117,72 @@ export default function Login({ status, canResetPassword }) {
                                     }
                                     toggleMask
                                     feedback={false}
-                                    placeholder="Password"
-                                    className="w-full"
+                                    placeholder="••••••••"
+                                    className={`luxury-password ${errors.password ? "p-invalid" : ""}`}
                                 />
-
                                 {errors.password && (
                                     <small className="p-error">
+                                        <i className="pi pi-exclamation-circle"></i>
                                         {errors.password}
                                     </small>
                                 )}
                             </div>
+                        </div>
 
-                            {/* Remember */}
-                            <div className="login-options">
-                                <div className="remember">
-                                    <Checkbox
-                                        checked={data.remember}
-                                        onChange={(e) =>
-                                            setData("remember", e.checked)
-                                        }
-                                    />
+                        <div className="login-options">
+                            <label className="remember-checkbox">
+                                <Checkbox
+                                    checked={data.remember}
+                                    onChange={(e) =>
+                                        setData("remember", e.checked)
+                                    }
+                                    className="custom-checkbox"
+                                />
+                                <span className="checkbox-label">
+                                    Remember me
+                                </span>
+                            </label>
 
-                                    <label>Remember me</label>
-                                </div>
+                            {canResetPassword && (
+                                <Link
+                                    href={route("password.request")}
+                                    className="forgot-link"
+                                >
+                                    <i className="pi pi-question-circle"></i>
+                                    Forgot Password?
+                                </Link>
+                            )}
+                        </div>
 
-                                {canResetPassword && (
-                                    <Link
-                                        href={route("password.request")}
-                                        className="forgot"
-                                    >
-                                        Forgot password?
-                                    </Link>
-                                )}
+                        <Button
+                            label={processing ? "Authenticating..." : "Sign In"}
+                            className="login-btn"
+                            disabled={processing}
+                            icon={
+                                processing
+                                    ? "pi pi-spin pi-spinner"
+                                    : "pi pi-sign-in"
+                            }
+                            iconPos="right"
+                        />
+
+                        <div className="login-footer">
+                            <div className="security-badge">
+                                <i className="pi pi-shield"></i>
+                                <span>
+                                    Secure Access | Encrypted Connection
+                                </span>
                             </div>
-
-                            {/* Login Button */}
-                            <Button
-                                label="Sign In"
-                                className="w-full login-btn"
-                                disabled={processing}
-                            />
-                        </form>
-                    </div>{" "}
+                            <div className="support-text">
+                                <i className="pi pi-star"></i>
+                                <span>
+                                    Zahinsoft | Software Development Compnay
+                                </span>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </GuestLayout>
+        </div>
     );
 }

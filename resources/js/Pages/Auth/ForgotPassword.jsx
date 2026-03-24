@@ -4,62 +4,119 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import TextInput from "@/Components/TextInput";
 import { Head, useForm } from "@inertiajs/react";
 
+import "./forgot-password.css";
+
 export default function ForgotPassword({ status }) {
     return (
-        <GuestLayout>
-            <Head title="Forgot Password" />
+        <div className="forgot-wrapper">
+            <div className="forgot-frame">
+                <div className="forgot-card">
+                    {/* Decorative corner elements with gemstones */}
+                    <div className="corner-decoration top-left">
+                        <div className="gemstone"></div>
+                    </div>
+                    <div className="corner-decoration top-right">
+                        <div className="gemstone"></div>
+                    </div>
+                    <div className="corner-decoration bottom-left">
+                        <div className="gemstone"></div>
+                    </div>
+                    <div className="corner-decoration bottom-right">
+                        <div className="gemstone"></div>
+                    </div>
 
-            <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
-                    {/* Branding */}
-                    <div className="text-center mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">
-                            Almas Jewelry
-                        </h1>
-                        <p className="text-sm text-gray-500">
-                            Password Recovery
+                    {/* Background pattern overlay */}
+                    <div className="pattern-overlay"></div>
+
+                    {/* Logo Section */}
+                    <div className="forgot-header">
+                        <div className="logo-wrapper">
+                            <div className="gem-sparkle"></div>
+                            <img
+                                src="/images/logo/almas_logo.png"
+                                alt="Almas Jewelry"
+                                className="forgot-logo"
+                            />
+                            <div className="ring-glow"></div>
+                        </div>
+
+                        <h1 className="brand-title">ALMAS</h1>
+                        <p className="brand-subtitle">
+                            Fine Jewelry Management
                         </p>
+                        <div className="gold-divider">
+                            <span className="divider-icon">✦</span>
+                            <span className="divider-line"></span>
+                            <span className="divider-icon">💎</span>
+                            <span className="divider-line"></span>
+                            <span className="divider-icon">✦</span>
+                        </div>
+                        <p className="recovery-title">Password Recovery</p>
                     </div>
 
-                    <div className="mb-4 text-sm text-gray-600 text-center">
-                        Enter your email address and we will send you a password
-                        reset link.
-                    </div>
-
+                    {/* Status Message */}
                     {status && (
-                        <div className="mb-4 text-sm font-medium text-green-600 text-center">
-                            {status}
+                        <div className="success-status">
+                            <i className="pi pi-check-circle"></i>
+                            <span>{status}</span>
                         </div>
                     )}
 
-                    {/* Button */}
-                    <div className="flex items-center justify-center mt-6">
-                        <PrimaryButton className="w-full justify-center">
-                            Contact Zahin Soft
-                        </PrimaryButton>
-                    </div>
-                    <div className="flex items-center justify-center mt-6">
-                        <PrimaryButton className="w-full justify-center">
-                            Contact Almas Jewelry
-                        </PrimaryButton>
+                    {/* Info Message */}
+                    <div className="info-message">
+                        <i className="pi pi-info-circle"></i>
+                        <span>
+                            Without credentials you can't access the system.
+                            Please contact the appropriate department for
+                            assistance.
+                        </span>
                     </div>
 
-                    {/* Footer / Permission */}
-                    <div className="mt-8 text-center text-xs text-gray-400">
-                        Access provided with permission from
-                        <span className="font-semibold"> Almas Jewelry </span>
-                        <br />
-                        Powered by{" "}
-                        <a
-                            href="https://zahinsoft.com"
-                            target="_blank"
-                            className="text-blue-500 hover:underline"
-                        >
-                            Zahin Soft
+                    {/* Contact Buttons */}
+                    <div className="contact-buttons">
+                        <button className="contact-btn zahin-btn">
+                            <i className="pi pi-building"></i>
+                            <span>Contact Zahin Soft</span>
+                            <i className="pi pi-arrow-right"></i>
+                        </button>
+
+                        <button className="contact-btn almas-btn">
+                            <i className="pi pi-star"></i>
+                            <span>Contact Almas Jewelry</span>
+                            <i className="pi pi-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="forgot-footer">
+                        <div className="permission-badge">
+                            <i className="pi pi-shield"></i>
+                            <span>Access provided with permission from</span>
+                            <strong>Almas Jewelry</strong>
+                        </div>
+                        <div className="powered-by">
+                            <span>Powered by</span>
+                            <a
+                                href="https://zahinsoft.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="zahin-link"
+                            >
+                                <i className="pi pi-code"></i>
+                                Zahin Soft
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Back to Login Link */}
+                    <div className="back-link">
+                        <a href="/login" className="back-to-login">
+                            <i className="pi pi-arrow-left"></i>
+                            <span>Back to Login</span>
                         </a>
                     </div>
                 </div>
             </div>
-        </GuestLayout>
+        </div>
     );
 }
