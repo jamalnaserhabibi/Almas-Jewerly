@@ -248,7 +248,17 @@ const Dashboard = () => {
                             Total Weight by Karat
                         </h4>
                         <div className="bg-primary-50 p-2 px-3 border-round">
-                            <span className="text-primary font-bold text-xl">
+                            <span
+                                className="  font-bold text-xl"
+                                style={{
+                                    color: "#00002D",
+                                    fontSize: "2.25rem",
+                                    borderRadius: "1%",
+
+                                    padding: "0.25rem 1rem",
+                                    // backgroundColor: "#00002D",
+                                }}
+                            >
                                 Grand Total:{" "}
                                 {stats.weight_per_karat
                                     .reduce((sum, k) => sum + k.total_weight, 0)
@@ -272,21 +282,29 @@ const Dashboard = () => {
                                     : 0;
 
                             return (
-                                <div
-                                    key={idx}
-                                    className="col-12 md:col-6 lg:col-4 xl:col-3 mb-3"
-                                >
+                                <div key={idx} className="col">
                                     <div className="p-4 border-round-xl shadow-1 surface-card hover:shadow-3 transition-all">
                                         <div className="flex justify-content-between align-items-start mb-3">
                                             <div>
-                                                <div className="text-2xl font-bold text-primary">
+                                                <div
+                                                    className="  font-bold "
+                                                    style={{
+                                                        color: "white",
+                                                        fontSize: "2.25rem",
+                                                        borderRadius: "10%",
+
+                                                        padding: "0.25rem 1rem",
+                                                        backgroundColor:
+                                                            "#00002D",
+                                                    }}
+                                                >
                                                     {karat.name}
                                                 </div>
                                                 <div className="text-sm text-500">
                                                     {/* Purity: {karat.purity}% */}
                                                 </div>
                                             </div>
-                                            <i className="pi pi-chart-line text-3xl text-primary opacity-50"></i>
+                                            <i className="pi pi-star  text-2xl opacity-40"></i>
                                         </div>
                                         <div className="text-3xl font-bold text-900 mb-2">
                                             {karat.total_weight.toFixed(2)}
@@ -317,7 +335,86 @@ const Dashboard = () => {
                     </div>
                 </Card>
             </div>
+            <div className="col">
+                <Card className="shadow-2">
+                    <div className="flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                        <h4 className="text-900 font-bold m-0">
+                            Items by Jewelry Type (In Stock)
+                        </h4>
+                        <div className="bg-primary-50 p-2 px-4 border-round">
+                            <span className="text-primary font-bold text-xl">
+                                Total:{" "}
+                                {stats.items_per_type.reduce(
+                                    (sum, t) => sum + t.count,
+                                    0,
+                                )}{" "}
+                                items
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                        {stats.items_per_type.map((type, idx) => {
+                            const totalItems = stats.items_per_type.reduce(
+                                (sum, t) => sum + t.count,
+                                0,
+                            );
+                            const percentage =
+                                totalItems > 0
+                                    ? ((type.count / totalItems) * 100).toFixed(
+                                          1,
+                                      )
+                                    : 0;
 
+                            return (
+                                <div key={idx} className="flex-1 min-w-100px">
+                                    <div className="text-center p-3 surface-ground border-round hover:shadow-2 transition-all">
+                                        <div className="text-xl font-bold text-primary">
+                                            {type.name}
+                                        </div>
+                                        <div className="text-2xl font-semibold text-900">
+                                            {type.count}
+                                        </div>
+                                        <div className="text-xs text-500 mt-1">
+                                            in stock
+                                        </div>
+                                        <div className="mt-2">
+                                            <div
+                                                className="w-full bg-gray-200 border-round overflow-hidden"
+                                                style={{ height: "4px" }}
+                                            >
+                                                <div
+                                                    className="bg-primary h-full"
+                                                    style={{
+                                                        width: `${percentage}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="text-right text-xs text-500 mt-1">
+                                                {percentage}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    {stats.top_jewelry_types.length > 0 && (
+                        <div className="mt-4 pt-3 border-top-1">
+                            <div className="text-sm text-600">
+                                🔥 Top Selling (All Time):
+                                {stats.top_jewelry_types.map((t, i) => (
+                                    <span key={i} className="font-bold ml-1">
+                                        {t.name} ({t.sold})
+                                        {i < stats.top_jewelry_types.length - 1
+                                            ? ","
+                                            : ""}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </Card>
+            </div>
             {/* Sales Chart */}
             <div className="grid">
                 <div className="col-12">

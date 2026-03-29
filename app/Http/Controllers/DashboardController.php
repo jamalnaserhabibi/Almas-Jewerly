@@ -34,15 +34,17 @@ class DashboardController extends Controller
         });
 
         // 2. Number of items per jewelry type
-        $itemsPerType = JewelryType::withCount('goldItems')
-            ->get()
-            ->map(function($type) {
-                return [
-                    'name' => $type->name,
-                    'count' => $type->gold_items_count,
-                    'info' => $type->info
-                ];
-            });
+     $itemsPerType = JewelryType::withCount(['goldItems' => function($q) {
+        $q->whereDoesntHave('sale');  // This excludes sold items
+    }])
+    ->get()
+    ->map(function($type) {
+        return [
+            'name' => $type->name,
+            'count' => $type->gold_items_count,
+            'info' => $type->info
+        ];
+    });
 
         // 3. Sales revenue (from sales table)
         $salesRevenue = Sale::whereBetween('sale_date', [$startDate, $endDate])
