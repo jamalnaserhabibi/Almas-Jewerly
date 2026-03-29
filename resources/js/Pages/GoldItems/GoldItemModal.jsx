@@ -16,6 +16,7 @@ export default function GoldItemModal({
     onSuccess,
     companies,
     karats,
+    jewelryTypes,
 }) {
     const { data, setData, post, put, processing, errors, reset } = useForm({
         source_type: item?.source_type || "company",
@@ -24,6 +25,7 @@ export default function GoldItemModal({
         weight: item?.weight || null,
         acidic_average: item?.acidic_average || null,
         karat_id: item?.karat_id || null,
+        jewelry_type_id: item?.jewelry_type_id || null,
         unit_price: item?.unit_price || null,
         fee: item?.fee || null,
         purchase_date: item?.purchase_date
@@ -44,6 +46,7 @@ export default function GoldItemModal({
                     weight: item.weight,
                     acidic_average: item.acidic_average,
                     karat_id: item.karat_id,
+                    jewelry_type_id: item.jewelry_type_id,
                     unit_price: item.unit_price,
                     fee: item.fee,
                     purchase_date: item.purchase_date
@@ -68,6 +71,7 @@ export default function GoldItemModal({
         formData.append("source_type", data.source_type);
         formData.append("weight", data.weight);
         formData.append("karat_id", data.karat_id);
+        formData.append("jewelry_type_id", data.jewelry_type_id);
         formData.append(
             "purchase_date",
             data.purchase_date instanceof Date
@@ -277,6 +281,26 @@ export default function GoldItemModal({
                     {errors.karat_id && (
                         <small className="p-error">{errors.karat_id}</small>
                     )}
+                </div>
+
+                <div className="field mb-4">
+                    <label
+                        htmlFor="jewelry_type_id"
+                        className="font-medium block mb-2"
+                    >
+                        Jewelry Type
+                    </label>
+                    <Dropdown
+                        id="jewelry_type_id"
+                        value={data.jewelry_type_id}
+                        options={jewelryTypes.map((j) => ({
+                            label: j.name,
+                            value: j.id,
+                        }))}
+                        onChange={(e) => setData("jewelry_type_id", e.value)}
+                        placeholder="Select jewelry type"
+                        className="w-full"
+                    />
                 </div>
 
                 {/* Weight */}

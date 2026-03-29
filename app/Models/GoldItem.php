@@ -16,6 +16,7 @@ class GoldItem extends Model
         'weight',
         'acidic_average',
         'karat_id',
+         'jewelry_type_id',
         'unit_price',     
         'fee',              
         'photo',
@@ -44,6 +45,12 @@ class GoldItem extends Model
     {
         return $this->belongsTo(Karat::class);
     }
+
+    public function jewelryType()
+    {
+        return $this->belongsTo(JewelryType::class);
+    }
+
 
     // Scopes
     public function scopeFromCompany($query)

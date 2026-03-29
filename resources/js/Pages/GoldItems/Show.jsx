@@ -78,6 +78,14 @@ export default function Show({ item }) {
                                     </tr>
                                     <tr className="border-b">
                                         <td className="font-medium py-2">
+                                            Jewelry Type:
+                                        </td>
+                                        <td className="py-2">
+                                            {item.jewelry_type?.name || "N/A"}
+                                        </td>
+                                    </tr>
+                                    <tr className="border-b">
+                                        <td className="font-medium py-2">
                                             Weight:
                                         </td>
                                         <td className="py-2">

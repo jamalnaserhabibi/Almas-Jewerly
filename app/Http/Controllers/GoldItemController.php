@@ -8,6 +8,7 @@ use App\Models\Karat;
 use App\Services\BarcodeService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\JewelryType;
 
 class GoldItemController extends Controller
 {
@@ -50,10 +51,9 @@ class GoldItemController extends Controller
     {
         $search = $request->input('search');
         
-      $items = GoldItem::with(['company', 'karat'])
-    ->whereDoesntHave('sale') // <-- only items without a sale
-    ->when($search, function ($query, $search) {
-        $query->where('barcode', 'like', "%{$search}%")
+      $items = GoldItem::with(['company', 'karat', 'jewelryType'])->whereDoesntHave('sale')  
+         ->when($search, function ($query, $search) {
+         $query->where('barcode', 'like', "%{$search}%")
               ->orWhere('individual_name', 'like', "%{$search}%")
               ->orWhereHas('company', function ($q) use ($search) {
                   $q->where('name', 'like', "%{$search}%");
@@ -70,6 +70,7 @@ class GoldItemController extends Controller
             ],
             'companies' => Company::orderBy('name')->get(),
             'karats' => Karat::orderBy('purity', 'desc')->get(),
+                'jewelryTypes' => JewelryType::orderBy('name')->get(),  
         ]);
     }
 
@@ -82,6 +83,7 @@ class GoldItemController extends Controller
         'karat_id' => 'required|exists:karats,id',
         'purchase_date' => 'required|date',
         'notes' => 'nullable|string',
+        'jewelry_type_id' => 'exists:jewelry_types,id',
         'photo' => 'nullable|image|max:2048',
     ];
 
@@ -132,6 +134,8 @@ public function update(Request $request, GoldItem $goldItem)
         'source_type' => 'required|in:company,individual',
         'weight' => 'required|numeric|min:0.001',
         'karat_id' => 'required|exists:karats,id',
+        'jewelry_type_id' => 'exists:jewelry_types,id',
+
         'purchase_date' => 'required|date',
         'notes' => 'nullable|string',
         'photo' => 'nullable|image|max:2048',
@@ -247,7 +251,7 @@ public function search(Request $request)
     public function show(GoldItem $goldItem)
     {
         return Inertia::render('GoldItems/Show', [
-            'item' => $goldItem->load(['company', 'karat'])
+            'item' => $goldItem->load(['company', 'karat', 'jewelryType', 'sale.customer'])
         ]);
     }
 }

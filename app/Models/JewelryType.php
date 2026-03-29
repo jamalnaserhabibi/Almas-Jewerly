@@ -5,31 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Karat extends Model
+class JewelryType extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
-        'purity',
+        'info',
     ];
 
     protected $casts = [
-        'purity' => 'decimal:2',
+        'is_active' => 'boolean',
     ];
 
-   
-
-    // Helper method to get formatted purity
-    public function getFormattedPurityAttribute(): string
+    public function scopeActive($query)
     {
-        return $this->purity . '%';
+        return $query->where('is_active', true);
     }
-     // Add this relationship
+
+    // Relationship with GoldItem 
     public function goldItems()
     {
         return $this->hasMany(GoldItem::class);
     }
-
-  
 }

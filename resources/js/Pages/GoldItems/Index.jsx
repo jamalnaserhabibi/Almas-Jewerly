@@ -13,7 +13,13 @@ import { Dialog } from "primereact/dialog"; // Add this import
 import GoldItemModal from "./GoldItemModal.jsx";
 import ExportToolbar from "../../Components/Export.jsx";
 
-export default function Index({ items, filters, companies, karats }) {
+export default function Index({
+    items,
+    filters,
+    companies,
+    karats,
+    jewelryTypes,
+}) {
     const [search, setSearch] = useState(filters.search || "");
     const [selectedItems, setSelectedItems] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
@@ -155,6 +161,10 @@ export default function Index({ items, filters, companies, karats }) {
             return rowData.company?.name || "N/A";
         }
         return rowData.individual_name || "N/A";
+    };
+
+    const jewelrytypesBodyTemplate = (rowData) => {
+        return rowData.jewelry_type?.name || "N/A";
     };
 
     // Template for karat
@@ -379,6 +389,7 @@ export default function Index({ items, filters, companies, karats }) {
                 onSuccess={handleModalSuccess}
                 companies={companies}
                 karats={karats}
+                jewelryTypes={jewelryTypes}
             />
 
             <div className="grid">
@@ -459,6 +470,11 @@ export default function Index({ items, filters, companies, karats }) {
                             <Column
                                 header="Source Name"
                                 body={sourceNameBodyTemplate}
+                                style={{ width: "15%" }}
+                            />
+                            <Column
+                                header="Type"
+                                body={jewelrytypesBodyTemplate}
                                 style={{ width: "15%" }}
                             />
                             <Column
@@ -734,6 +750,10 @@ export default function Index({ items, filters, companies, karats }) {
 //                                 <div className="text-xs text-gray-500 mb-1">Karat</div>
 //                                 <div className="font-medium">{item.karat?.name || "N/A"}</div>
 //                             </div>
+// <div className="col-6">
+//      <div className="text-xs text-gray-500 mb-1">Jewelry Type</div>
+//    <div className="font-medium">{item.jewelry_type?.name || "N/A"}</div>
+// </div>
 //                             <div className="col-6">
 //                                 <div className="text-xs text-gray-500 mb-1">Weight</div>
 //                                 <div className="font-medium">{parseFloat(item.weight).toFixed(2)}g</div>

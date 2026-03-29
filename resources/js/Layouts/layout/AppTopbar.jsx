@@ -240,7 +240,6 @@ const AppTopbar = forwardRef((props, ref) => {
 
                 {/* User Info and Menu */}
                 <div className="flex align-items-center gap-3">
-                    {/* User Name (hidden on mobile) */}
                     <span className="hidden lg:inline text-900 flex align-items-center font-bold   mt-1">
                         {user?.name || "User"}
                     </span>
