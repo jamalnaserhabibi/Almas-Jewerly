@@ -20,18 +20,19 @@ class DashboardController extends Controller
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->toDateString());
 
-        // 1. Total weight per karat (all items including sold)
-        $weightPerKarat = Karat::withSum(['goldItems' => function($q) {
-            $q->select(DB::raw('COALESCE(SUM(weight), 0)'));
-        }], 'weight')
-        ->get()
-        ->map(function($karat) {
-            return [
-                'name' => $karat->name,
-                'total_weight' => round($karat->gold_items_sum_weight ?? 0, 2),
-                'purity' => $karat->purity
-            ];
-        });
+     // 1. Total weight per karat (only items in stock - not sold)
+$weightPerKarat = Karat::withSum(['goldItems' => function($q) {
+    $q->whereDoesntHave('sale')  // This excludes sold items
+      ->select(DB::raw('COALESCE(SUM(weight), 0)'));
+}], 'weight')
+->get()
+->map(function($karat) {
+    return [
+        'name' => $karat->name,
+        'total_weight' => round($karat->gold_items_sum_weight ?? 0, 2),
+        'purity' => $karat->purity
+    ];
+});
 
         // 2. Number of items per jewelry type
      $itemsPerType = JewelryType::withCount(['goldItems' => function($q) {

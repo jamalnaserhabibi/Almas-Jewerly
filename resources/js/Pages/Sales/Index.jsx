@@ -11,38 +11,79 @@ import { Toolbar } from "primereact/toolbar";
 import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
 import { Card } from "primereact/card";
+import { Calendar } from "primereact/calendar";
 import ExportToolbar from "../../Components/Export.jsx";
 
 export default function Index({ sales, filters }) {
     const [search, setSearch] = useState(filters.search || "");
-    const [photoVisible, setPhotoVisible] = useState(false); // Add this
-    const [selectedPhoto, setSelectedPhoto] = useState(null); // Add this
-    const [selectedPhotoAlt, setSelectedPhotoAlt] = useState(""); // Add this
+    const [startDate, setStartDate] = useState(filters.start_date || null);
+    const [endDate, setEndDate] = useState(filters.end_date || null);
+    const [photoVisible, setPhotoVisible] = useState(false);
+    const [selectedPhoto, setSelectedPhoto] = useState(null);
+    const [selectedPhotoAlt, setSelectedPhotoAlt] = useState("");
     const [selectedSales, setSelectedSales] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
+
+    // Helper function to apply filters
+    const applyFilters = () => {
+        const params = {
+            page: 1,
+        };
+
+        if (search) params.search = search;
+        if (startDate) params.start_date = startDate;
+        if (endDate) params.end_date = endDate;
+
+        router.get(route("sales.index"), params, {
+            preserveState: true,
+            replace: true,
+            preserveScroll: true,
+        });
+    };
 
     // Debounce search
     useEffect(() => {
         const timer = setTimeout(() => {
             if (search !== filters.search) {
-                router.get(
-                    route("sales.index"),
-                    {
-                        search: search,
-                        page: 1,
-                    },
-                    {
-                        preserveState: true,
-                        replace: true,
-                        preserveScroll: true,
-                    },
-                );
+                applyFilters();
             }
         }, 500);
 
         return () => clearTimeout(timer);
     }, [search]);
+
+    // Handle date filter changes
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const hasDateChanged =
+                startDate !== filters.start_date ||
+                endDate !== filters.end_date;
+
+            if (hasDateChanged) {
+                applyFilters();
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [startDate, endDate]);
+
+    // Clear all filters
+    const clearFilters = () => {
+        setSearch("");
+        setStartDate(null);
+        setEndDate(null);
+
+        router.get(
+            route("sales.index"),
+            {},
+            {
+                preserveState: true,
+                replace: true,
+                preserveScroll: true,
+            },
+        );
+    };
 
     // Format currency
     const formatCurrency = (value) => {
@@ -141,13 +182,11 @@ export default function Index({ sales, filters }) {
     };
 
     // Template for photo
-    // Template for photo
     const photoBodyTemplate = (rowData) => {
         const photoUrl = rowData.gold_item?.photo
             ? `/storage/${rowData.gold_item.photo}`
             : null;
 
-        // Add click handler
         const handlePhotoClick = () => {
             if (photoUrl) {
                 setSelectedPhoto(photoUrl);
@@ -166,10 +205,10 @@ export default function Index({ sales, filters }) {
                     width: "50px",
                     height: "50px",
                     objectFit: "cover",
-                    cursor: "pointer", // Add pointer cursor
+                    cursor: "pointer",
                 }}
                 className="border-round hover:shadow-4 transition-all"
-                onClick={handlePhotoClick} // Add click handler
+                onClick={handlePhotoClick}
             />
         ) : (
             <div className="w-3rem h-3rem bg-gray-200 border-round flex align-items-center justify-content-center">
@@ -178,7 +217,7 @@ export default function Index({ sales, filters }) {
         );
     };
 
-    // Template for actions column - FIXED: Added delete button
+    // Template for actions column
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="flex gap-2">
@@ -270,10 +309,10 @@ export default function Index({ sales, filters }) {
         );
     };
 
-    // Right toolbar content (search)
+    // Right toolbar content (filters)
     const rightToolbarTemplate = () => {
         return (
-            <div className="flex gap-2">
+            <div className="flex gap-2 align-items-center">
                 <span className="p-input-icon-left">
                     <i className="pi pi-search" />
                     <InputText
@@ -284,14 +323,47 @@ export default function Index({ sales, filters }) {
                         autoComplete="off"
                     />
                 </span>
-                {search && (
+
+                <Calendar
+                    value={startDate ? new Date(startDate) : null}
+                    onChange={(e) => {
+                        const date = e.value;
+                        setStartDate(
+                            date ? date.toISOString().split("T")[0] : null,
+                        );
+                    }}
+                    placeholder="Start Date"
+                    dateFormat="yy-mm-dd"
+                    showIcon
+                    className="p-inputtext-sm"
+                    style={{ width: "150px" }}
+                />
+
+                <span className="text-sm text-500">to</span>
+
+                <Calendar
+                    value={endDate ? new Date(endDate) : null}
+                    onChange={(e) => {
+                        const date = e.value;
+                        setEndDate(
+                            date ? date.toISOString().split("T")[0] : null,
+                        );
+                    }}
+                    placeholder="End Date"
+                    dateFormat="yy-mm-dd"
+                    showIcon
+                    className="p-inputtext-sm"
+                    style={{ width: "150px" }}
+                />
+
+                {(search || startDate || endDate) && (
                     <Button
                         icon="pi pi-times"
                         rounded
                         text
                         severity="secondary"
-                        onClick={() => setSearch("")}
-                        tooltip="Clear search"
+                        onClick={clearFilters}
+                        tooltip="Clear all filters"
                         tooltipOptions={{ position: "top" }}
                     />
                 )}
@@ -365,6 +437,8 @@ export default function Index({ sales, filters }) {
                                         {
                                             page: newPage,
                                             search: search,
+                                            start_date: startDate,
+                                            end_date: endDate,
                                         },
                                         {
                                             preserveState: true,

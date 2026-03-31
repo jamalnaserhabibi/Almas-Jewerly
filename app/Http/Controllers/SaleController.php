@@ -14,6 +14,8 @@ class SaleController extends Controller
 public function index(Request $request)
 {
     $search = $request->input('search');
+    $startDate = $request->input('start_date');
+    $endDate = $request->input('end_date');
     
     $sales = Sale::with([
         'goldItem.karat',           // Load karat relationship through goldItem
@@ -31,17 +33,22 @@ public function index(Request $request)
             });
         });
     })
+    ->when($startDate, function ($query, $startDate) {
+        $query->whereDate('sale_date', '>=', $startDate);
+    })
+    ->when($endDate, function ($query, $endDate) {
+        $query->whereDate('sale_date', '<=', $endDate);
+    })
     ->orderBy('created_at', 'desc')
     ->paginate(10)
     ->withQueryString();
 
-    // Debug: Check if goldItem is loaded
-    // \Log::info('Sales data:', $sales->toArray());
-// dd($sales);
     return Inertia::render('Sales/Index', [
         'sales' => $sales,
         'filters' => [
             'search' => $search,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
         ],
     ]);
 }
@@ -49,7 +56,6 @@ public function index(Request $request)
  public function createForItem(GoldItem $goldItem)
 {
     // Debug: Log to see if goldItem exists
-    \Log::info('Creating sale for gold item:', ['id' => $goldItem->id, 'exists' => $goldItem ? 'yes' : 'no']);
     
   
 

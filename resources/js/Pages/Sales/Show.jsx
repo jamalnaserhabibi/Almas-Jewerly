@@ -42,7 +42,7 @@ export default function Show({ sale }) {
                         <div className="grid">
                             {/* Sale Information Card */}
                             <div className="col-12 md:col-6">
-                                <Card className="bg-gray-50">
+                                <Card className="bg-gray-10">
                                     <h3 className="text-lg font-bold mb-3">
                                         <i className="pi pi-shopping-cart mr-2"></i>
                                         Sale Information
@@ -93,7 +93,7 @@ export default function Show({ sale }) {
 
                             {/* Customer Information Card */}
                             <div className="col-12 md:col-6">
-                                <Card className="bg-gray-50">
+                                <Card className="bg-gray-10">
                                     <h3 className="text-lg font-bold mb-3">
                                         <i className="pi pi-user mr-2"></i>
                                         Customer Details
@@ -134,7 +134,7 @@ export default function Show({ sale }) {
 
                             {/* Gold Item Details Card */}
                             <div className="col-12 mt-4">
-                                <Card className="bg-gray-50">
+                                <Card className="bg-gray-10">
                                     <h3 className="text-lg font-bold mb-3">
                                         <i className="pi pi-star mr-2"></i>
                                         Gold Item Details
@@ -276,7 +276,7 @@ export default function Show({ sale }) {
                             {/* Notes Card */}
                             {sale.notes && (
                                 <div className="col-12 mt-4">
-                                    <Card className="bg-gray-50">
+                                    <Card className="bg-gray-10">
                                         <h3 className="text-lg font-bold mb-3">
                                             <i className="pi pi-file mr-2"></i>
                                             Notes

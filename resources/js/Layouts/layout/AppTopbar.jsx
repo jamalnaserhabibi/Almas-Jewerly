@@ -8,12 +8,15 @@ import React, {
     useRef,
     useState,
     useEffect,
+    useMemo,
+    useCallback,
 } from "react";
 import { LayoutContext } from "./context/layoutcontext";
 import { Link, usePage, router } from "@inertiajs/react";
 import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
 import { Menu } from "primereact/menu";
+import { toJalaali } from "jalaali-js"; // Install: npm install jalaali-js
 
 const AppTopbar = forwardRef((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } =
@@ -23,162 +26,214 @@ const AppTopbar = forwardRef((props, ref) => {
     const topbarmenubuttonRef = useRef(null);
     const menuRef = useRef(null);
 
-    // Get current user
+    // Get current user with better fallback
     const { auth } = usePage().props;
     const user = auth?.user;
+    const displayName = user?.name || "Guest";
+    const userInitial = displayName.charAt(0).toUpperCase() || "U";
 
     // State for current time
     const [currentTime, setCurrentTime] = useState(new Date());
 
-    // State for theme
-    const [isDarkTheme, setIsDarkTheme] = useState(() => {
-        // Check current theme from localStorage or default to dark (vela-blue)
+    // Theme configuration
+    const THEMES = {
+        DARK: {
+            id: "vela-blue",
+            name: "dark",
+            isDark: true,
+            logoColor: "white",
+            logoSrc: "/images/logo/almas_logo2.png",
+        },
+        LIGHT: {
+            id: "saga-blue",
+            name: "light",
+            isDark: false,
+            logoColor: "#00002D",
+            logoSrc: "/images/logo/almas_logo.png",
+        },
+    };
+
+    // State for theme with proper initialization
+    const [currentTheme, setCurrentTheme] = useState(() => {
         const savedTheme = localStorage.getItem("theme");
-        return savedTheme === "saga-blue" ? false : true;
+        // Check if saved theme exists and is valid, otherwise default to dark
+        if (savedTheme === THEMES.LIGHT.id) {
+            return THEMES.LIGHT;
+        }
+        return THEMES.DARK;
     });
 
-    // State for logo text color
-    const [logoColor, setLogoColor] = useState(
-        isDarkTheme ? "white" : "#00002D",
-    );
+    // Proper Solar Hijri date formatting using jalaali-js
+    const formatAfghanistanDate = useCallback((date) => {
+        try {
+            const { jy, jm, jd } = toJalaali(date);
+            const weekdays = [
+                "یکشنبه",
+                "دوشنبه",
+                "سه‌شنبه",
+                "چهارشنبه",
+                "پنج‌شنبه",
+                "جمعه",
+                "شنبه",
+            ];
+            const months = [
+                "حمل",
+                "ثور",
+                "جوزا",
+                "سرطان",
+                "اسد",
+                "سنبله",
+                "میزان",
+                "عقرب",
+                "قوس",
+                "جدی",
+                "دلو",
+                "حوت",
+            ];
 
-    // State for logo image
-    const [logoSrc, setLogoSrc] = useState(
-        isDarkTheme
-            ? "/images/logo/almas_logo2.png"
-            : "/images/logo/almas_logo.png",
-    );
+            const weekdayName = weekdays[date.getDay()];
+            const monthName = months[jm - 1];
 
-    // Update time every second
+            return `${weekdayName}، ${jd} ${monthName} ${jy}`;
+        } catch (error) {
+            console.error("Error formatting Afghanistan date:", error);
+            return "تاریخ نامعتبر";
+        }
+    }, []);
+
+    // Memoized formatted date/time values to optimize performance
+    const formattedDateTime = useMemo(() => {
+        if (!currentTime)
+            return { englishDate: "", afghanistanDate: "", formattedTime: "" };
+
+        try {
+            return {
+                englishDate: currentTime.toLocaleDateString("en-US", {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                }),
+                afghanistanDate: formatAfghanistanDate(currentTime),
+                formattedTime: currentTime.toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                    hour12: true,
+                }),
+            };
+        } catch (error) {
+            console.error("Error formatting date/time:", error);
+            return { englishDate: "", afghanistanDate: "", formattedTime: "" };
+        }
+    }, [currentTime, formatAfghanistanDate]);
+
+    // Update time every second with proper cleanup
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrentTime(new Date());
         }, 1000);
 
-        return () => clearInterval(timer);
+        return () => {
+            clearInterval(timer);
+        };
+    }, []);
+
+    // Apply theme changes to DOM and localStorage
+    const applyTheme = useCallback((theme) => {
+        const themeLink = document.getElementById("theme-css");
+        if (themeLink) {
+            themeLink.href = `/themes/${theme.id}/theme.css`;
+            localStorage.setItem("theme", theme.id);
+            setCurrentTheme(theme);
+        } else {
+            console.error("Theme link element not found");
+            // Fallback: try to find theme link by selector
+            const fallbackThemeLink = document.querySelector(
+                'link[href*="theme.css"]',
+            );
+            if (fallbackThemeLink) {
+                fallbackThemeLink.href = `/themes/${theme.id}/theme.css`;
+                localStorage.setItem("theme", theme.id);
+                setCurrentTheme(theme);
+            }
+        }
     }, []);
 
     // Theme switcher function
-    const toggleTheme = () => {
-        const themeLink = document.getElementById("theme-css");
-        if (themeLink) {
-            if (isDarkTheme) {
-                // Switch to light theme (saga-blue)
-                themeLink.href = "/themes/saga-blue/theme.css";
-                localStorage.setItem("theme", "saga-blue");
-                setIsDarkTheme(false);
-                setLogoColor("#00002D"); // Dark blue color for light theme
-                setLogoSrc("/images/logo/almas_logo.png"); // Light theme logo
+    const toggleTheme = useCallback(() => {
+        const newTheme = currentTheme.isDark ? THEMES.LIGHT : THEMES.DARK;
+        applyTheme(newTheme);
+    }, [currentTheme, applyTheme]);
+
+    // Handle user logout with error handling
+    const handleLogout = useCallback(() => {
+        try {
+            router.post(
+                route("logout"),
+                {},
+                {
+                    onError: (errors) => {
+                        console.error("Logout failed:", errors);
+                        // Fallback logout if route fails
+                        window.location.href = "/logout";
+                    },
+                },
+            );
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Fallback logout
+            window.location.href = "/logout";
+        }
+    }, []);
+
+    // Handle profile navigation with Inertia
+    const handleProfileClick = useCallback(() => {
+        try {
+            const profileRoute = route("profile.edit");
+            if (profileRoute) {
+                router.get(profileRoute);
             } else {
-                // Switch to dark theme (vela-blue)
-                themeLink.href = "/themes/vela-blue/theme.css";
-                localStorage.setItem("theme", "vela-blue");
-                setIsDarkTheme(true);
-                setLogoColor("white"); // White color for dark theme
-                setLogoSrc("/images/logo/almas_logo2.png"); // Dark theme logo
+                console.error("Profile route not found");
+                window.location.href = "/profile";
             }
+        } catch (error) {
+            console.error("Profile navigation error:", error);
+            window.location.href = "/profile";
         }
-    };
+    }, []);
 
-    // Format English date
-    const englishDate = currentTime.toLocaleDateString("en-US", {
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
-
-    // Format Afghanistan date (Solar Hijri)
-    const formatAfghanistanDate = (date) => {
-        const days = [
-            "یکشنبه",
-            "دوشنبه",
-            "سه‌شنبه",
-            "چهارشنبه",
-            "پنج‌شنبه",
-            "جمعه",
-            "شنبه",
-        ];
-        const months = [
-            "حمل",
-            "ثور",
-            "جوزا",
-            "سرطان",
-            "اسد",
-            "سنبله",
-            "میزان",
-            "عقرب",
-            "قوس",
-            "جدی",
-            "دلو",
-            "حوت",
-        ];
-
-        // Approximate Solar Hijri conversion
-        const gregorianYear = date.getFullYear();
-        const gregorianMonth = date.getMonth();
-        const gregorianDay = date.getDate();
-
-        let solarYear = gregorianYear - 621;
-        let solarMonth = gregorianMonth + 1;
-        let solarDay = gregorianDay;
-
-        // Adjust for Nowruz (March 21)
-        if (gregorianMonth < 2 || (gregorianMonth === 2 && gregorianDay < 21)) {
-            solarYear = gregorianYear - 622;
-            solarMonth = gregorianMonth + 10;
-        } else {
-            solarMonth = gregorianMonth - 2;
-        }
-
-        // Adjust month range
-        if (solarMonth > 12) solarMonth -= 12;
-        if (solarMonth < 1) solarMonth += 12;
-
-        const dayName = days[date.getDay()];
-        const monthName = months[solarMonth - 1];
-
-        return `${dayName}، ${solarDay} ${monthName} ${solarYear}`;
-    };
-
-    const afghanistanDate = formatAfghanistanDate(currentTime);
-
-    // Format time
-    const formattedTime = currentTime.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-    });
-
-    // User menu items
-    const userMenuItems = [
-        {
-            label: user?.name || "User",
-            items: [
-                {
-                    label: "Profile",
-                    icon: "pi pi-user",
-                    command: () => {
-                        window.location.href = route("profile.edit");
+    // User menu items with proper handlers
+    const userMenuItems = useMemo(
+        () => [
+            {
+                label: displayName,
+                items: [
+                    {
+                        label: "Profile",
+                        icon: "pi pi-user",
+                        command: handleProfileClick,
                     },
-                },
-                {
-                    label: "Logout",
-                    icon: "pi pi-lock",
-                    command: () => {
-                        router.post(route("logout"));
+                    {
+                        label: "Logout",
+                        icon: "pi pi-lock",
+                        command: handleLogout,
                     },
-                },
-            ],
-        },
-    ];
+                ],
+            },
+        ],
+        [displayName, handleProfileClick, handleLogout],
+    );
+
+    // Sync logo based on current theme
+    const logoSrc = currentTheme.logoSrc;
+    const logoColor = currentTheme.logoColor;
 
     return (
         <div className="layout-topbar">
             {/* Logo Section */}
             <Link href="/" className="layout-topbar-logo">
-                <img src={logoSrc} alt="logo" />
+                <img src={logoSrc} alt="Almas Jewelry Logo" />
                 <span
                     className="ml-2 font-bold"
                     style={{ color: logoColor, fontSize: "1.8rem" }}
@@ -193,6 +248,7 @@ const AppTopbar = forwardRef((props, ref) => {
                 type="button"
                 className="p-link layout-menu-button layout-topbar-button"
                 onClick={onMenuToggle}
+                aria-label="Toggle Menu"
             >
                 <i className="pi pi-bars" />
             </button>
@@ -205,43 +261,72 @@ const AppTopbar = forwardRef((props, ref) => {
                     className="p-button-rounded p-button-text p-button-plain"
                     onClick={toggleTheme}
                     tooltip={
-                        isDarkTheme
+                        currentTheme.isDark
                             ? "Switch to Light Theme"
                             : "Switch to Dark Theme"
                     }
                     tooltipOptions={{ position: "bottom" }}
+                    aria-label={
+                        currentTheme.isDark
+                            ? "Switch to Light Theme"
+                            : "Switch to Dark Theme"
+                    }
                 >
                     <i
-                        className={`pi ${isDarkTheme ? "pi-sun" : "pi-moon"} text-xl`}
-                    ></i>
+                        className={`pi ${currentTheme.isDark ? "pi-sun" : "pi-moon"} text-xl`}
+                        aria-hidden="true"
+                    />
                 </Button>
 
-                {/* Date and Time Display - Both Formats */}
+                {/* Date and Time Display - Desktop */}
                 <div className="hidden md:flex flex-row gap-5 align-items-end">
                     {/* English Date */}
-                    <div className="text-md font-bold text-900">
-                        {englishDate}
+                    <div
+                        className="text-md font-bold text-900"
+                        aria-label="English Date"
+                    >
+                        {formattedDateTime.englishDate}
                     </div>
+
                     {/* Afghanistan Date */}
                     <div
                         className="text-md font-bold text-900"
                         style={{
                             fontFamily: "Vazirmatn, system-ui, sans-serif",
                         }}
+                        aria-label="Afghanistan Date"
+                        dir="rtl"
                     >
-                        {afghanistanDate}
+                        {formattedDateTime.afghanistanDate}
                     </div>
+
                     {/* Time */}
-                    <div className="text-lg font-bold text-900 flex align-items-center gap-2 mt-1">
-                        <i className="pi pi-clock text-primary"></i>
-                        {formattedTime}
+                    <div
+                        className="text-lg font-bold text-900 flex align-items-center gap-2 mt-1"
+                        aria-label="Current Time"
+                    >
+                        <i
+                            className="pi pi-clock text-primary"
+                            aria-hidden="true"
+                        ></i>
+                        {formattedDateTime.formattedTime}
+                    </div>
+                </div>
+
+                {/* Mobile Date/Time - Simplified version for mobile */}
+                <div className="flex md:hidden flex-row gap-2 align-items-center">
+                    <div className="text-sm font-bold text-900">
+                        {formattedDateTime.formattedTime}
                     </div>
                 </div>
 
                 {/* User Info and Menu */}
                 <div className="flex align-items-center gap-3">
-                    <span className="hidden lg:inline text-900 flex align-items-center font-bold   mt-1">
-                        {user?.name || "User"}
+                    <span
+                        className="hidden lg:inline text-900 flex align-items-center font-bold mt-1"
+                        aria-label={`Logged in as ${displayName}`}
+                    >
+                        {displayName}
                     </span>
 
                     {/* User Avatar with Dropdown Menu */}
@@ -251,15 +336,16 @@ const AppTopbar = forwardRef((props, ref) => {
                             type="button"
                             className="p-button-rounded p-button-text p-button-plain"
                             onClick={(e) => menuRef.current?.toggle(e)}
+                            aria-label="User Menu"
+                            aria-haspopup="true"
                         >
                             <Avatar
-                                label={
-                                    user?.name?.charAt(0).toUpperCase() || "U"
-                                }
+                                label={userInitial}
                                 shape="circle"
                                 size="large"
                                 className="bg-primary text-white"
                                 style={{ width: "40px", height: "40px" }}
+                                aria-label={`User avatar for ${displayName}`}
                             />
                         </Button>
 
@@ -284,6 +370,7 @@ const AppTopbar = forwardRef((props, ref) => {
                         layoutState.profileSidebarVisible,
                 })}
                 style={{ display: "none" }}
+                aria-hidden="true"
             />
         </div>
     );
