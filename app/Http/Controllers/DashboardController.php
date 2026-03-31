@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $startDate = $request->get('start_date', now()->startOfMonth()->toDateString());
         $endDate = $request->get('end_date', now()->toDateString());
 
-     // 1. Total weight per karat (only items in stock - not sold)
+  
 $weightPerKarat = Karat::withSum(['goldItems' => function($q) {
     $q->whereDoesntHave('sale')  // This excludes sold items
       ->select(DB::raw('COALESCE(SUM(weight), 0)'));
